@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sky Strike</title>
+    <style>
+        body {
+            margin: 0;
+            background: #101820;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        canvas {
+            display: block;
+            margin: 15px auto;
+            border: 4px solid white;
+            max-width: 95%;
+            background: #6ec6ed;
+        }
+
+        #shop {
+            display: none;
+            width: 700px;
+            max-width: 90%;
+            margin: 15px auto;
+            padding: 15px;
+            background: #202a35;
+            border: 2px solid white;
+            border-radius: 10px;
+        }
+
+        .shopButton {
+            margin: 6px;
+            padding: 12px 18px;
+            font-size: 16px;
+            background: #3478db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .shopButton:hover {
+            background: #4c91f0;
+        }
+
+        .shopButton:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+<a href="index.html" style="
+position:fixed;
+top:15px;
+right:15px;
+z-index:9999;
+padding:12px 20px;
+border-radius:14px;
+background:linear-gradient(135deg,#5865f2,#a855f7);
+color:white;
+text-decoration:none;
+font:bold 14px Arial;
+letter-spacing:1.5px;
+border:2px solid rgba(255,255,255,.3);
+box-shadow:0 5px 0 #3b3f9e,0 8px 18px rgba(0,0,0,.35);
+transition:.15s;
+" onmouseover="this.style.transform='translateY(-2px)';this.style.filter='brightness(1.2)'"
+onmouseout="this.style.transform='';this.style.filter=''"
+>
+⌂ HOME
+</a>
+<h1>🚀 SKY STRIKE</h1>
+
+<p>← → Move | SPACE Drop Bomb</p>
+
+<canvas id="game" width="900" height="550"></canvas>
+
+<div id="shop">
+
+    <h2>🛠️ UPGRADE SHOP</h2>
+
+    <p>
+        Points:
+        <strong id="shopPoints">0</strong>
+    </p>
+
+    <button class="shopButton" id="healthUpgrade">
+        ❤️ +25 Health — 100 Points
+    </button>
+
+    <button class="shopButton" id="speedUpgrade">
+        ⚡ Faster Plane — 150 Points
+    </button>
+
+    <button class="shopButton" id="bombUpgrade">
+        💥 Stronger Bombs — 200 Points
+    </button>
+
+    <button class="shopButton" id="ammoUpgrade">
+        📦 +10 Max Ammo — 150 Points
+    </button>
+
+    <button class="shopButton" id="armorUpgrade">
+        🛡️ Armor — 250 Points
+    </button>
+
+    <br>
+
+    <button class="shopButton" id="continueButton">
+        ▶ Next Level
+    </button>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let keys = {};
+
+let bombs = [];
+let bullets = [];
+let enemies = [];
+
+let score = 0;
+let points = 0;
+
+let level = 1;
+let health = 100;
+
+let maxAmmo = 30;
+let ammo = 30;
+
+let bombDamage = 1;
+let armor = 0;
+
+let gameOver = false;
+let levelComplete = false;
+
+let lastEnemyShot = 0;
+
+const player = {
+    x: 420,
+    y: 70,
+    width: 60,
+    height: 32,
+    speed: 7
+};
+
+document.addEventListener("keydown", e => {
+
+    keys[e.key] = true;
+
+    if (e.code === "Space") {
+        dropBomb();
+        e.preventDefault();
+    }
+
+    if (e.key.toLowerCase() === "r" && gameOver) {
+        location.reload();
+    }
+});
+
+document.addEventListener("keyup", e => {
+    keys[e.key] = false;
+});
+
+function createLevel() {
+
+    enemies = [];
+    bombs = [];
+    bullets = [];
+
+    ammo = maxAmmo;
+
+    const numberOfEnemies =
+        Math.min(3 + level, 14);
+
+    for (let i = 0; i < numberOfEnemies; i++) {
+
+        enemies.push({
+
+            x: 50 + Math.random() * 780,
+
+            y: 350 + Math.random() * 100,
+
+            width: 65,
+            height: 45,
+
+            alive: true,
+
+            health:
+                level >= 5 && i === 0
+                    ? 3
+                    : 1,
+
+            boss:
+                level >= 5 && i === 0
+        });
+    }
+
+    levelComplete = false;
+}
+
+function dropBomb() {
+
+    if (
+        gameOver ||
+        levelComplete ||
+        ammo <= 0
+    ) {
+        return;
+    }
+
+    ammo--;
+
+    bombs.push({
+
+        x: player.x + player.width / 2 - 6,
+
+        y: player.y + player.height,
+
+        size: 12,
+
+        speed: 7,
+
+        damage: bombDamage
+    });
+}
+
+function enemyShoot() {
+
+    const now = Date.now();
+
+    const fireRate =
+        Math.max(280, 1300 - level * 75);
+
+    if (now - lastEnemyShot < fireRate) {
+        return;
+    }
+
+    lastEnemyShot = now;
+
+    const livingEnemies =
+        enemies.filter(e => e.alive);
+
+    if (livingEnemies.length === 0) {
+        return;
+    }
+
+    const enemy =
+        livingEnemies[
+            Math.floor(
+                Math.random() *
+                livingEnemies.length
+            )
+        ];
+
+    const startX =
+        enemy.x + enemy.width / 2;
+
+    const startY = enemy.y;
+
+    const targetX =
+        player.x + player.width / 2;
+
+    const targetY =
+        player.y + player.height / 2;
+
+    const dx = targetX - startX;
+    const dy = targetY - startY;
+
+    const distance =
+        Math.sqrt(dx * dx + dy * dy);
+
+    const speed =
+        3 + level * 0.35;
+
+    bullets.push({
+
+        x: startX,
+        y: startY,
+
+        vx: (dx / distance) * speed,
+
+        vy: (dy / distance) * speed,
+
+        size: enemy.boss ? 9 : 7
+    });
+
+    if (enemy.boss && level >= 7) {
+
+        const angle =
+            Math.atan2(dy, dx);
+
+        bullets.push({
+
+            x: startX,
+            y: startY,
+
+            vx:
+                Math.cos(angle + 0.18) *
+                speed,
+
+            vy:
+                Math.sin(angle + 0.18) *
+                speed,
+
+            size: 7
+        });
+    }
+}
+
+function update() {
+
+    if (gameOver) {
+        return;
+    }
+
+    if (
+        keys["ArrowLeft"] &&
+        player.x > 0
+    ) {
+        player.x -= player.speed;
+    }
+
+    if (
+        keys["ArrowRight"] &&
+        player.x <
+        canvas.width - player.width
+    ) {
+        player.x += player.speed;
+    }
+
+    bombs.forEach(bomb => {
+        bomb.y += bomb.speed;
+    });
+
+    enemyShoot();
+
+    bullets.forEach(bullet => {
+        bullet.x += bullet.vx;
+        bullet.y += bullet.vy;
+    });
+
+    bombs.forEach(bomb => {
+
+        enemies.forEach(enemy => {
+
+            if (!enemy.alive) return;
+
+            if (
+                bomb.x <
+                    enemy.x + enemy.width &&
+
+                bomb.x + bomb.size >
+                    enemy.x &&
+
+                bomb.y <
+                    enemy.y + enemy.height &&
+
+                bomb.y + bomb.size >
+                    enemy.y
+            ) {
+
+                bomb.y = 9999;
+
+                enemy.health -= bomb.damage;
+
+                if (enemy.health <= 0) {
+
+                    enemy.alive = false;
+
+                    const reward =
+                        enemy.boss ? 500 : 100;
+
+                    score += reward;
+                    points += reward;
+                }
+            }
+        });
+    });
+
+    bullets.forEach(bullet => {
+
+        if (
+            bullet.x > player.x &&
+            bullet.x < player.x + player.width &&
+            bullet.y > player.y &&
+            bullet.y < player.y + player.height
+        ) {
+
+            bullet.y = 9999;
+
+            const damage =
+                Math.max(2, 10 - armor);
+
+            health -= damage;
+
+            if (health <= 0) {
+                health = 0;
+                gameOver = true;
+            }
+        }
+    });
+
+    bombs = bombs.filter(
+        bomb => bomb.y < canvas.height
+    );
+
+    bullets = bullets.filter(
+        bullet =>
+            bullet.y < canvas.height + 50 &&
+            bullet.y > -50 &&
+            bullet.x > -50 &&
+            bullet.x < canvas.width + 50
+    );
+
+    if (
+        enemies.every(e => !e.alive) &&
+        !levelComplete
+    ) {
+
+        levelComplete = true;
+
+        openShop();
+    }
+}function openShop() {
+
+    document.getElementById("shop").style.display =
+        "block";
+
+    updateShop();
+}
+
+function updateShop() {
+
+    document.getElementById("shopPoints").textContent =
+        points;
+
+    document.getElementById("healthUpgrade").disabled =
+        points < 100 || health >= 100;
+
+    document.getElementById("speedUpgrade").disabled =
+        points < 150;
+
+    document.getElementById("bombUpgrade").disabled =
+        points < 200;
+
+    document.getElementById("ammoUpgrade").disabled =
+        points < 150;
+
+    document.getElementById("armorUpgrade").disabled =
+        points < 250;
+}
+
+document.getElementById("healthUpgrade")
+.addEventListener("click", () => {
+
+    if (points >= 100 && health < 100) {
+
+        points -= 100;
+
+        health = Math.min(
+            100,
+            health + 25
+        );
+
+        updateShop();
+    }
+});
+
+document.getElementById("speedUpgrade")
+.addEventListener("click", () => {
+
+    if (points >= 150) {
+
+        points -= 150;
+
+        player.speed += 1;
+
+        updateShop();
+    }
+});
+
+document.getElementById("bombUpgrade")
+.addEventListener("click", () => {
+
+    if (points >= 200) {
+
+        points -= 200;
+
+        bombDamage++;
+
+        updateShop();
+    }
+});
+
+document.getElementById("ammoUpgrade")
+.addEventListener("click", () => {
+
+    if (points >= 150) {
+
+        points -= 150;
+
+        maxAmmo += 10;
+
+        updateShop();
+    }
+});
+
+document.getElementById("armorUpgrade")
+.addEventListener("click", () => {
+
+    if (points >= 250) {
+
+        points -= 250;
+
+        armor += 2;
+
+        updateShop();
+    }
+});
+
+document.getElementById("continueButton")
+.addEventListener("click", () => {
+
+    document.getElementById("shop").style.display =
+        "none";
+
+    level++;
+
+    health = Math.min(
+        100,
+        health + 10
+    );
+
+    createLevel();
+});
+
+function drawBackground() {
+
+    const gradient =
+        ctx.createLinearGradient(
+            0, 0, 0, canvas.height
+        );
+
+    gradient.addColorStop(0, "#55bce8");
+    gradient.addColorStop(1, "#d9f5ff");
+
+    ctx.fillStyle = gradient;
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    ctx.fillStyle =
+        "rgba(255,255,255,0.7)";
+
+    ctx.beginPath();
+
+    ctx.arc(120, 100, 25, 0, Math.PI * 2);
+    ctx.arc(150, 100, 35, 0, Math.PI * 2);
+    ctx.arc(185, 105, 25, 0, Math.PI * 2);
+
+    ctx.fill();
+
+    ctx.beginPath();
+
+    ctx.arc(650, 160, 25, 0, Math.PI * 2);
+    ctx.arc(680, 160, 35, 0, Math.PI * 2);
+    ctx.arc(720, 165, 25, 0, Math.PI * 2);
+
+    ctx.fill();
+
+    ctx.fillStyle = "#39853c";
+
+    ctx.fillRect(
+        0,
+        500,
+        canvas.width,
+        50
+    );
+}
+
+function drawPlayer() {
+
+    ctx.fillStyle = "#333";
+
+    ctx.fillRect(
+        player.x,
+        player.y,
+        player.width,
+        player.height
+    );
+
+    ctx.fillStyle = "#222";
+
+    ctx.fillRect(
+        player.x - 20,
+        player.y + 10,
+        100,
+        8
+    );
+
+    ctx.fillStyle = "#63d7ff";
+
+    ctx.fillRect(
+        player.x + 22,
+        player.y + 3,
+        18,
+        12
+    );
+
+    ctx.fillStyle = "#ff8c00";
+
+    ctx.fillRect(
+        player.x + 5,
+        player.y + 28,
+        12,
+        10
+    );
+
+    ctx.fillRect(
+        player.x + 43,
+        player.y + 28,
+        12,
+        10
+    );
+}
+
+function drawEnemies() {
+
+    enemies.forEach(enemy => {
+
+        if (!enemy.alive) return;
+
+        ctx.fillStyle =
+            enemy.boss
+                ? "#8b0000"
+                : "#555";
+
+        ctx.fillRect(
+            enemy.x,
+            enemy.y,
+            enemy.width,
+            enemy.height
+        );
+
+        ctx.fillStyle =
+            enemy.boss
+                ? "#ffcc00"
+                : "#777";
+
+        ctx.fillRect(
+            enemy.x + 12,
+            enemy.y - 12,
+            enemy.width - 24,
+            12
+        );
+
+        if (enemy.health > 1) {
+
+            ctx.fillStyle = "red";
+
+            ctx.fillRect(
+                enemy.x,
+                enemy.y - 22,
+                enemy.width,
+                6
+            );
+
+            ctx.fillStyle = "#00ff00";
+
+            ctx.fillRect(
+                enemy.x,
+                enemy.y - 22,
+                enemy.width *
+                (enemy.health / 3),
+                6
+            );
+        }
+    });
+}
+
+function drawBombs() {
+
+    bombs.forEach(bomb => {
+
+        ctx.fillStyle = "black";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bomb.x + bomb.size / 2,
+            bomb.y + bomb.size / 2,
+            bomb.size / 2,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+    });
+}
+
+function drawBullets() {
+
+    bullets.forEach(bullet => {
+
+        ctx.fillStyle = "#ff2222";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bullet.x,
+            bullet.y,
+            bullet.size,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+    });
+}
+
+function drawHUD() {
+
+    ctx.font = "21px Arial";
+    ctx.fillStyle = "black";
+
+    ctx.fillText(
+        "Score: " + score,
+        20,
+        30
+    );
+
+    ctx.fillText(
+        "Level: " + level,
+        20,
+        57
+    );
+
+    ctx.fillText(
+        "Points: " + points,
+        20,
+        84
+    );
+
+    ctx.fillText(
+        "Ammo: " + ammo + "/" + maxAmmo,
+        20,
+        111
+    );
+
+    ctx.fillStyle = "#333";
+
+    ctx.fillRect(
+        650,
+        18,
+        220,
+        25
+    );
+
+    ctx.fillStyle =
+        health > 60
+            ? "#19c919"
+            : health > 30
+                ? "#ffcc00"
+                : "#ff2222";
+
+    ctx.fillRect(
+        650,
+        18,
+        220 * (health / 100),
+        25
+    );
+
+    ctx.strokeStyle = "white";
+
+    ctx.strokeRect(
+        650,
+        18,
+        220,
+        25
+    );
+
+    ctx.fillStyle = "black";
+    ctx.font = "16px Arial";
+
+    ctx.fillText(
+        "HEALTH",
+        655,
+        36
+    );
+}
+
+function draw() {
+
+    drawBackground();
+    drawPlayer();
+    drawEnemies();
+    drawBombs();
+    drawBullets();
+    drawHUD();
+
+    if (gameOver) {
+
+        ctx.fillStyle =
+            "rgba(0,0,0,0.75)";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        ctx.textAlign = "center";
+
+        ctx.fillStyle = "#ff4444";
+
+        ctx.font = "50px Arial";
+
+        ctx.fillText(
+            "MISSION FAILED",
+            450,
+            230
+        );
+
+        ctx.fillStyle = "white";
+
+        ctx.font = "25px Arial";
+
+        ctx.fillText(
+            "Score: " + score,
+            450,
+            280
+        );
+
+        ctx.fillText(
+            "Points: " + points,
+            450,
+            315
+        );
+
+        ctx.fillText(
+            "You reached level " + level,
+            450,
+            350
+        );
+
+        ctx.fillText(
+            "Press R to restart",
+            450,
+            400
+        );
+
+        ctx.textAlign = "left";
+    }
+}
+
+function gameLoop() {
+
+    update();
+    draw();
+
+    requestAnimationFrame(gameLoop);
+}
+
+createLevel();
+gameLoop();
+
+</script>
+
+</body>
+</html>

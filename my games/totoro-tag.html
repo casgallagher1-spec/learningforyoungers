@@ -1,0 +1,2910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TAG! - 2 Player Game</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #080808;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    overflow: hidden;
+}
+
+
+/* =====================================================
+   MENU
+===================================================== */
+
+#menu {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, #174632, #050505);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 100;
+}
+
+#menu h1 {
+    font-size: 75px;
+    margin: 0;
+
+    color: #00ff88;
+
+    text-shadow:
+        0 0 10px #00ff88,
+        0 0 30px #00ff88,
+        0 0 60px #00ff88;
+}
+
+#menu h2 {
+    margin-top: 5px;
+    color: #ddd;
+}
+
+.mapTitle {
+    margin-top: 25px;
+    font-size: 22px;
+}
+
+.mapButtons {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.mapButton {
+    width: 180px;
+    height: 110px;
+
+    border: 3px solid #555;
+    border-radius: 15px;
+
+    color: white;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: .15s;
+}
+
+.mapButton:hover {
+    transform: scale(1.07);
+    border-color: #00ff88;
+}
+
+#parkButton {
+    background:
+        linear-gradient(
+            rgba(30,120,60,.6),
+            rgba(5,50,20,.9)
+        );
+}
+
+#factoryButton {
+    background:
+        linear-gradient(
+            rgba(100,100,100,.6),
+            rgba(25,25,25,.95)
+        );
+}
+
+#desertButton {
+    background:
+        linear-gradient(
+            rgba(210,160,60,.6),
+            rgba(100,55,10,.95)
+        );
+}
+
+#selectedMap {
+    margin-top: 15px;
+    color: #00ff88;
+    font-weight: bold;
+}
+
+#startButton {
+    margin-top: 25px;
+
+    padding: 15px 45px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: #00ff88;
+
+    color: #111;
+
+    font-size: 24px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+#startButton:hover {
+    background: #00cc6a;
+    transform: scale(1.05);
+}
+
+
+/* =====================================================
+   GAME UI
+===================================================== */
+
+#gameScreen {
+    display: none;
+}
+
+.gameTitle {
+    margin: 7px 0 2px;
+    color: #00ff88;
+}
+
+#info {
+    font-size: 17px;
+}
+
+#timer {
+    font-size: 32px;
+    font-weight: bold;
+    color: #ffd700;
+    margin: 3px;
+}
+
+
+/* =====================================================
+   GAME AREA
+===================================================== */
+
+#game {
+    position: relative;
+
+    width: 92vw;
+    max-width: 900px;
+
+    height: 70vh;
+
+    margin: auto;
+
+    border: 4px solid white;
+
+    overflow: hidden;
+}
+
+
+/* =====================================================
+   MAPS
+===================================================== */
+
+#game.park {
+
+    background-color: #27733a;
+
+    background-image:
+        radial-gradient(
+            rgba(255,255,255,.08) 2px,
+            transparent 2px
+        );
+
+    background-size: 35px 35px;
+}
+
+#game.factory {
+
+    background-color: #292929;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.03) 2px,
+            transparent 2px
+        ),
+
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.03) 2px,
+            transparent 2px
+        );
+
+    background-size: 45px 45px;
+}
+
+#game.desert {
+
+    background-color: #c18a3c;
+
+    background-image:
+        radial-gradient(
+            rgba(255,220,130,.18) 3px,
+            transparent 3px
+        );
+
+    background-size: 55px 55px;
+}
+
+
+/* =====================================================
+   DECORATIONS
+===================================================== */
+
+.decoration {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+}
+
+
+/* TREES */
+
+.tree {
+    width: 45px;
+    height: 60px;
+}
+
+.tree::before {
+    content: "";
+
+    position: absolute;
+
+    width: 15px;
+    height: 27px;
+
+    background: #654321;
+
+    left: 15px;
+    top: 33px;
+}
+
+.tree::after {
+    content: "";
+
+    position: absolute;
+
+    width: 44px;
+    height: 44px;
+
+    background: #145c2a;
+
+    left: 0;
+    top: 0;
+
+    border-radius: 50%;
+
+    box-shadow:
+        -10px 8px 0 #1c7135,
+        10px 8px 0 #1c7135;
+}
+
+
+/* BUSHES */
+
+.bush {
+    width: 50px;
+    height: 28px;
+
+    background: #116127;
+
+    border-radius: 50%;
+
+    box-shadow:
+        15px -7px 0 #187536,
+        30px 0 0 #0e5422;
+}
+
+
+/* ROCKS */
+
+.rock {
+    width: 42px;
+    height: 25px;
+
+    background: #777;
+
+    border-radius: 50%;
+
+    transform: rotate(-10deg);
+}
+
+
+/* BENCH */
+
+.bench {
+    width: 65px;
+    height: 20px;
+
+    background: #8b5a2b;
+
+    border-radius: 4px;
+
+    box-shadow:
+        0 14px 0 -5px #5c3b1e;
+}
+
+
+/* FACTORY */
+
+.crate {
+    width: 38px;
+    height: 38px;
+
+    background: #9b642f;
+
+    border: 3px solid #5f3b1d;
+
+    transform: rotate(4deg);
+}
+
+.pipe {
+    width: 90px;
+    height: 14px;
+
+    background: #777;
+
+    border: 3px solid #aaa;
+
+    border-radius: 10px;
+}
+
+.machine {
+    width: 55px;
+    height: 55px;
+
+    background: #454545;
+
+    border: 4px solid #777;
+
+    border-radius: 8px;
+}
+
+
+/* CACTUS */
+
+.cactus {
+    width: 22px;
+    height: 62px;
+
+    background: #287a32;
+
+    border-radius: 12px;
+
+    box-shadow:
+        -14px 15px 0 -5px #287a32,
+        14px 25px 0 -5px #287a32;
+}
+
+.desertRock {
+    width: 48px;
+    height: 30px;
+
+    background: #80602e;
+
+    border-radius: 50%;
+}
+
+
+/* =====================================================
+   OBSTACLES
+===================================================== */
+
+.obstacle {
+    position: absolute;
+
+    z-index: 3;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 5px 12px rgba(0,0,0,.35);
+}
+
+.parkObstacle {
+    background:
+        linear-gradient(
+            135deg,
+            #6e4b2d,
+            #8f623a
+        );
+
+    border: 3px solid #b88a73;
+}
+
+.factoryObstacle {
+    background:
+        linear-gradient(
+            135deg,
+            #444,
+            #666
+        );
+
+    border: 3px solid #888;
+}
+
+.desertObstacle {
+    background:
+        linear-gradient(
+            135deg,
+            #70501f,
+            #9a7030
+        );
+
+    border: 3px solid #d39b45;
+}
+
+
+/* =====================================================
+   NORMAL POWERUPS
+===================================================== */
+
+.powerup {
+    position: absolute;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    z-index: 8;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+
+    animation:
+        powerFloat 1.2s ease-in-out infinite;
+
+    box-shadow:
+        0 0 10px currentColor,
+        0 0 25px currentColor;
+}
+
+@keyframes powerFloat {
+
+    0%,100% {
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+    50% {
+        transform:
+            translateY(-6px)
+            scale(1.08);
+    }
+}
+
+.speed {
+    background: #00eaff;
+    color: #00eaff;
+    border: 3px solid white;
+}
+
+.shield {
+    background: #9b5cff;
+    color: #9b5cff;
+    border: 3px solid white;
+}
+
+.dash {
+    background: #ff7b00;
+    color: #ff7b00;
+    border: 3px solid white;
+}
+
+.time {
+    background: #ffe600;
+    color: #ffe600;
+    border: 3px solid white;
+}
+
+
+/* =====================================================
+   TOTORO
+===================================================== */
+
+.totoro {
+
+    width: 58px;
+    height: 58px;
+
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #bdbdbd,
+            #666 65%,
+            #292929
+        );
+
+    color: white;
+
+    border: 4px solid #d7f7ff;
+
+    font-size: 34px;
+
+    z-index: 12;
+
+    box-shadow:
+        0 0 10px #bff7ff,
+        0 0 25px #72eaff,
+        0 0 50px #3adfff,
+        0 0 90px rgba(58,223,255,.8);
+
+    animation:
+        totoroFloat .8s ease-in-out infinite,
+        totoroGlow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes totoroFloat {
+
+    0%,100% {
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+    50% {
+        transform:
+            translateY(-10px)
+            scale(1.15);
+    }
+}
+
+@keyframes totoroGlow {
+
+    from {
+        filter: brightness(1);
+    }
+
+    to {
+        filter: brightness(1.7);
+    }
+}
+
+
+/* =====================================================
+   PLAYER
+===================================================== */
+
+.player {
+    position: absolute;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 50%;
+
+    z-index: 20;
+
+    transition:
+        box-shadow .2s,
+        transform .2s;
+}
+
+#runner {
+    background: #00aaff;
+
+    border: 4px solid #9eeaff;
+
+    box-shadow:
+        0 0 10px #00aaff,
+        0 0 25px #00aaff,
+        0 0 40px rgba(0,170,255,.5);
+}
+
+#chaser {
+    background: #ff2222;
+
+    border: 4px solid #ff9999;
+
+    box-shadow:
+        0 0 10px #ff2222,
+        0 0 25px #ff2222,
+        0 0 40px rgba(255,0,0,.5);
+}
+
+
+/* =====================================================
+   SHIELD
+===================================================== */
+
+.shielded {
+
+    box-shadow:
+        0 0 10px #9b5cff,
+        0 0 30px #9b5cff,
+        0 0 55px #9b5cff !important;
+
+    transform: scale(1.1);
+}
+
+
+/* =====================================================
+   TOTORO POWERED RUNNER
+===================================================== */
+
+.totoroPowered {
+
+    width: 78px !important;
+    height: 78px !important;
+
+    background:
+        radial-gradient(
+            circle at 35% 25%,
+            #d0d0d0,
+            #777 50%,
+            #303030
+        ) !important;
+
+    border: 6px solid #eaffff !important;
+
+    box-shadow:
+        0 0 15px #ffffff,
+        0 0 35px #69eeff,
+        0 0 70px #00dfff,
+        0 0 120px #00bfff !important;
+
+    transform: scale(1.25) !important;
+}
+
+
+/* =====================================================
+   BUFF TEXT
+===================================================== */
+
+#buffText {
+
+    position: absolute;
+
+    top: 8px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    z-index: 40;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    color: white;
+
+    text-shadow:
+        0 2px 4px black;
+
+    pointer-events: none;
+}
+
+
+/* =====================================================
+   END MESSAGE
+===================================================== */
+
+#message {
+
+    position: absolute;
+
+    z-index: 50;
+
+    top: 50%;
+    left: 50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    background:
+        rgba(0,0,0,.96);
+
+    border: 3px solid white;
+
+    border-radius: 20px;
+
+    padding: 30px;
+
+    min-width: 320px;
+
+    font-size: 30px;
+
+    font-weight: bold;
+
+    display: none;
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.gameButton {
+
+    margin-top: 7px;
+
+    padding: 9px 22px;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    border: none;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+#restartButton {
+    background: #00ff88;
+}
+
+#menuButton {
+
+    background: #555;
+
+    color: white;
+
+    margin-left: 5px;
+}
+
+.controls {
+
+    color: #ccc;
+
+    font-size: 14px;
+
+    margin-top: 6px;
+}
+
+</style>
+</head>
+
+
+<body>
+<a href="index.html" style="
+position:fixed;
+top:15px;
+right:15px;
+z-index:9999;
+padding:12px 20px;
+border-radius:14px;
+background:linear-gradient(135deg,#5865f2,#a855f7);
+color:white;
+text-decoration:none;
+font:bold 14px Arial;
+letter-spacing:1.5px;
+border:2px solid rgba(255,255,255,.3);
+box-shadow:0 5px 0 #3b3f9e,0 8px 18px rgba(0,0,0,.35);
+transition:.15s;
+" onmouseover="this.style.transform='translateY(-2px)';this.style.filter='brightness(1.2)'"
+onmouseout="this.style.transform='';this.style.filter=''"
+>
+⌂ HOME
+</a>
+
+<!-- =====================================================
+     MENU
+===================================================== -->
+
+<div id="menu">
+
+    <h1>TAG!</h1>
+
+    <h2>🏃 2 PLAYER TAG 👹</h2>
+
+    <div class="mapTitle">
+        Choose your map:
+    </div>
+
+    <div class="mapButtons">
+
+        <button
+            class="mapButton"
+            id="parkButton"
+            onclick="selectMap('park')">
+
+            🌳<br>
+            PARK
+
+        </button>
+
+        <button
+            class="mapButton"
+            id="factoryButton"
+            onclick="selectMap('factory')">
+
+            🏭<br>
+            FACTORY
+
+        </button>
+
+        <button
+            class="mapButton"
+            id="desertButton"
+            onclick="selectMap('desert')">
+
+            🏜️<br>
+            DESERT
+
+        </button>
+
+    </div>
+
+    <div id="selectedMap">
+        Selected: 🌳 Park
+    </div>
+
+    <button
+        id="startButton"
+        onclick="startGame()">
+
+        ▶ START GAME
+
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     GAME
+===================================================== -->
+
+<div id="gameScreen">
+
+    <h1 class="gameTitle">
+        🏃 TAG! 👹
+    </h1>
+
+    <div id="info">
+
+        🔵 RUNNER: WASD
+
+        &nbsp;&nbsp;&nbsp;
+
+        🔴 CHASER: ARROW KEYS
+
+    </div>
+
+    <div id="timer">
+        2:00
+    </div>
+
+    <div id="game">
+
+        <div id="buffText"></div>
+
+        <div
+            id="runner"
+            class="player">
+        </div>
+
+        <div
+            id="chaser"
+            class="player">
+        </div>
+
+        <div id="message"></div>
+
+    </div>
+
+    <button
+        class="gameButton"
+        id="restartButton"
+        onclick="restartGame()">
+
+        🔄 Restart
+
+    </button>
+
+    <button
+        class="gameButton"
+        id="menuButton"
+        onclick="backToMenu()">
+
+        🏠 Menu
+
+    </button>
+
+    <div class="controls">
+
+        🔵 Blue = Runner
+        &nbsp; | &nbsp;
+        🔴 Red = Chaser
+
+        <br>
+
+        ⚡ Speed
+        &nbsp;
+        🛡️ Shield
+        &nbsp;
+        🌀 Dash
+        &nbsp;
+        ⏱️ Chaser Time Boost
+        &nbsp;
+        🐻 Totoro = ULTRA POWER
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   GAME VARIABLES
+===================================================== */
+
+const game =
+    document.getElementById("game");
+
+const runner =
+    document.getElementById("runner");
+
+const chaser =
+    document.getElementById("chaser");
+
+const timerDisplay =
+    document.getElementById("timer");
+
+const message =
+    document.getElementById("message");
+
+const menu =
+    document.getElementById("menu");
+
+const gameScreen =
+    document.getElementById("gameScreen");
+
+const selectedMap =
+    document.getElementById("selectedMap");
+
+const buffText =
+    document.getElementById("buffText");
+
+
+const PLAYER_SIZE = 40;
+
+const NORMAL_SPEED = 5;
+
+const FAST_SPEED = 8;
+
+
+/* =====================================================
+   TOTORO SETTINGS
+===================================================== */
+
+const TOTORO_SPEED = 14;
+
+const TOTORO_DURATION = 15000;
+
+const TOTORO_FIRST_DURATION = 3000;
+
+
+/* =====================================================
+   POWERUP SETTINGS
+===================================================== */
+
+const BUFF_SPAWN_TIME = 10000;
+
+const MAX_POWERUPS = 4;
+
+
+/* =====================================================
+   STATE
+===================================================== */
+
+let selectedMapName = "park";
+
+let obstacles = [];
+
+let powerups = [];
+
+let keys = {};
+
+let gameRunning = false;
+
+let timeLeft = 120;
+
+let powerupTimer = null;
+
+let totoroTimer = null;
+
+let runnerSpeed =
+    NORMAL_SPEED;
+
+let runnerShield = false;
+
+let chaserSpeed =
+    NORMAL_SPEED;
+
+let totoroPowered = false;
+
+
+let runnerPos = {
+    x: 30,
+    y: 30
+};
+
+let chaserPos = {
+    x: 700,
+    y: 400
+};
+
+
+/* =====================================================
+   MAPS
+===================================================== */
+
+const maps = {
+
+    park: {
+
+        obstacles: [
+
+            [20,18,12,4],
+            [48,12,4,18],
+            [72,28,15,4],
+            [12,52,4,16],
+            [36,44,15,4],
+            [65,62,4,18]
+
+        ],
+
+        decorations: [
+
+            ["tree",5,5],
+            ["tree",88,5],
+            ["tree",5,80],
+            ["tree",88,78],
+            ["tree",32,8],
+            ["tree",68,8],
+            ["bush",15,30],
+            ["bush",80,42],
+            ["rock",50,30],
+            ["rock",25,75],
+            ["bench",55,78]
+
+        ]
+
+    },
+
+
+    factory: {
+
+        obstacles: [
+
+            [10,15,17,5],
+            [42,8,5,20],
+            [70,18,18,5],
+            [18,42,5,20],
+            [35,38,18,5],
+            [65,48,5,18],
+            [12,72,20,5],
+            [50,72,18,5]
+
+        ],
+
+        decorations: [
+
+            ["crate",4,30],
+            ["crate",28,12],
+            ["crate",85,35],
+            ["crate",48,28],
+            ["machine",30,72],
+            ["machine",76,70],
+            ["machine",7,55],
+            ["pipe",25,28],
+            ["pipe",75,8],
+            ["crate",55,55]
+
+        ]
+
+    },
+
+
+    desert: {
+
+        obstacles: [
+
+            [18,18,12,6],
+            [48,12,7,6],
+            [73,25,14,6],
+            [10,45,12,6],
+            [34,38,8,6],
+            [58,48,13,6],
+            [78,60,12,6],
+            [20,65,13,6],
+            [45,76,9,6]
+
+        ],
+
+        decorations: [
+
+            ["cactus",5,10],
+            ["cactus",90,10],
+            ["cactus",6,75],
+            ["cactus",88,78],
+            ["cactus",35,20],
+            ["cactus",68,65],
+            ["desertRock",24,30],
+            ["desertRock",55,30],
+            ["desertRock",82,42],
+            ["desertRock",14,78]
+
+        ]
+
+    }
+
+};
+
+
+/* =====================================================
+   SELECT MAP
+===================================================== */
+
+function selectMap(mapName) {
+
+    selectedMapName =
+        mapName;
+
+
+    if (mapName === "park") {
+
+        selectedMap.innerHTML =
+            "Selected: 🌳 Park";
+
+    }
+
+    if (mapName === "factory") {
+
+        selectedMap.innerHTML =
+            "Selected: 🏭 Factory";
+
+    }
+
+    if (mapName === "desert") {
+
+        selectedMap.innerHTML =
+            "Selected: 🏜️ Desert";
+
+    }
+
+}
+
+
+/* =====================================================
+   CREATE MAP
+===================================================== */
+
+function createMap() {
+
+    game
+        .querySelectorAll(
+            ".obstacle, .decoration, .powerup"
+        )
+        .forEach(
+            object =>
+                object.remove()
+        );
+
+
+    obstacles = [];
+
+    powerups = [];
+
+
+    const map =
+        maps[selectedMapName];
+
+
+    /* OBSTACLES */
+
+    map.obstacles.forEach(
+        data => {
+
+            const obstacle =
+                document.createElement("div");
+
+
+            obstacle.classList.add(
+                "obstacle"
+            );
+
+
+            obstacle.classList.add(
+                selectedMapName +
+                "Obstacle"
+            );
+
+
+            obstacle.style.left =
+                data[0] + "%";
+
+
+            obstacle.style.top =
+                data[1] + "%";
+
+
+            obstacle.style.width =
+                data[2] + "%";
+
+
+            obstacle.style.height =
+                data[3] + "%";
+
+
+            game.insertBefore(
+                obstacle,
+                runner
+            );
+
+
+            obstacles.push(
+                obstacle
+            );
+
+        }
+    );
+
+
+    /* DECORATIONS */
+
+    map.decorations.forEach(
+        data => {
+
+            const decoration =
+                document.createElement("div");
+
+
+            decoration.classList.add(
+                "decoration"
+            );
+
+
+            decoration.classList.add(
+                data[0]
+            );
+
+
+            decoration.style.left =
+                data[1] + "%";
+
+
+            decoration.style.top =
+                data[2] + "%";
+
+
+            game.insertBefore(
+                decoration,
+                runner
+            );
+
+        }
+    );
+
+
+    /*
+     * IMPORTANT:
+     *
+     * Totoro spawns FIRST.
+     * He only lasts 3 seconds.
+     */
+
+    spawnTotoroFirst();
+
+}
+
+
+/* =====================================================
+   SPAWN TOTORO FIRST
+===================================================== */
+
+function spawnTotoroFirst() {
+
+    let x;
+
+    let y;
+
+    let tries = 0;
+
+
+    do {
+
+        x =
+            Math.random() *
+            (
+                game.clientWidth -
+                65
+            );
+
+
+        y =
+            Math.random() *
+            (
+                game.clientHeight -
+                65
+            );
+
+
+        tries++;
+
+    } while (
+
+        (
+
+            touchingObstacle(
+                x,
+                y
+            )
+
+            ||
+
+            distanceBetween(
+                x,
+                y,
+                runnerPos.x,
+                runnerPos.y
+            ) < 100
+
+            ||
+
+            distanceBetween(
+                x,
+                y,
+                chaserPos.x,
+                chaserPos.y
+            ) < 100
+
+        )
+
+        &&
+
+        tries < 100
+
+    );
+
+
+    const totoro =
+        document.createElement("div");
+
+
+    totoro.classList.add(
+        "powerup",
+        "totoro"
+    );
+
+
+    totoro.innerHTML =
+        "🐻";
+
+
+    totoro.style.left =
+        x + "px";
+
+
+    totoro.style.top =
+        y + "px";
+
+
+    totoro.dataset.type =
+        "totoro";
+
+
+    game.insertBefore(
+        totoro,
+        runner
+    );
+
+
+    powerups.push(
+        totoro
+    );
+
+
+    /*
+     * ONLY 3 SECONDS!
+     */
+
+    totoroTimer =
+        setTimeout(
+            function() {
+
+                const index =
+                    powerups.indexOf(
+                        totoro
+                    );
+
+
+                if (
+                    index !== -1
+                ) {
+
+                    totoro.remove();
+
+                    powerups.splice(
+                        index,
+                        1
+                    );
+
+
+                    showBuff(
+                        "🐻 TOTORO ESCAPED!"
+                    );
+
+                }
+
+
+                totoroTimer =
+                    null;
+
+            },
+
+            TOTORO_FIRST_DURATION
+        );
+
+}
+
+
+/* =====================================================
+   NORMAL POWERUP SPAWNER
+===================================================== */
+
+function startPowerupSpawner() {
+
+    if (
+        powerupTimer
+    ) {
+
+        clearInterval(
+            powerupTimer
+        );
+
+    }
+
+
+    powerupTimer =
+        setInterval(
+            function() {
+
+                if (
+                    !gameRunning
+                ) {
+
+                    return;
+
+                }
+
+
+                spawnPowerup();
+
+            },
+
+            BUFF_SPAWN_TIME
+        );
+
+}
+
+
+/* =====================================================
+   STOP POWERUPS
+===================================================== */
+
+function stopPowerupSpawner() {
+
+    if (
+        powerupTimer
+    ) {
+
+        clearInterval(
+            powerupTimer
+        );
+
+
+        powerupTimer =
+            null;
+
+    }
+
+}
+
+
+/* =====================================================
+   NORMAL POWERUP
+===================================================== */
+
+function spawnPowerup() {
+
+    if (
+        powerups.length >=
+        MAX_POWERUPS
+    ) {
+
+        return;
+
+    }
+
+
+    let x;
+
+    let y;
+
+    let tries = 0;
+
+
+    do {
+
+        x =
+            Math.random() *
+            (
+                game.clientWidth -
+                50
+            );
+
+
+        y =
+            Math.random() *
+            (
+                game.clientHeight -
+                50
+            );
+
+
+        tries++;
+
+    } while (
+
+        (
+
+            touchingObstacle(
+                x,
+                y
+            )
+
+            ||
+
+            distanceBetween(
+                x,
+                y,
+                runnerPos.x,
+                runnerPos.y
+            ) < 100
+
+            ||
+
+            distanceBetween(
+                x,
+                y,
+                chaserPos.x,
+                chaserPos.y
+            ) < 100
+
+        )
+
+        &&
+
+        tries < 100
+
+    );
+
+
+    /*
+     * Totoro is deliberately NOT
+     * included here.
+     */
+
+    const normalTypes = [
+
+        {
+            type: "speed",
+            icon: "⚡"
+        },
+
+        {
+            type: "shield",
+            icon: "🛡️"
+        },
+
+        {
+            type: "dash",
+            icon: "🌀"
+        },
+
+        {
+            type: "time",
+            icon: "⏱️"
+        }
+
+    ];
+
+
+    const power =
+        normalTypes[
+            Math.floor(
+                Math.random() *
+                normalTypes.length
+            )
+        ];
+
+
+    const element =
+        document.createElement("div");
+
+
+    element.classList.add(
+        "powerup",
+        power.type
+    );
+
+
+    element.innerHTML =
+        power.icon;
+
+
+    element.style.left =
+        x + "px";
+
+
+    element.style.top =
+        y + "px";
+
+
+    element.dataset.type =
+        power.type;
+
+
+    game.insertBefore(
+        element,
+        runner
+    );
+
+
+    powerups.push(
+        element
+    );
+
+}
+
+
+/* =====================================================
+   DISTANCE
+===================================================== */
+
+function distanceBetween(
+    x1,
+    y1,
+    x2,
+    y2
+) {
+
+    const dx =
+        x1 - x2;
+
+    const dy =
+        y1 - y2;
+
+    return Math.sqrt(
+        dx * dx +
+        dy * dy
+    );
+
+}
+
+
+/* =====================================================
+   KEYBOARD
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        const key =
+            event.key.toLowerCase();
+
+
+        keys[key] =
+            true;
+
+
+        if (
+
+            key === "arrowup" ||
+            key === "arrowdown" ||
+            key === "arrowleft" ||
+            key === "arrowright"
+
+        ) {
+
+            event.preventDefault();
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    function(event) {
+
+        keys[
+            event.key.toLowerCase()
+        ] = false;
+
+    }
+);
+
+
+/* =====================================================
+   OBSTACLE COLLISION
+===================================================== */
+
+function touchingObstacle(
+    x,
+    y
+) {
+
+    for (
+        const obstacle of obstacles
+    ) {
+
+        const ox =
+            obstacle.offsetLeft;
+
+        const oy =
+            obstacle.offsetTop;
+
+        const ow =
+            obstacle.offsetWidth;
+
+        const oh =
+            obstacle.offsetHeight;
+
+
+        if (
+
+            x <
+            ox + ow
+
+            &&
+
+            x + PLAYER_SIZE >
+            ox
+
+            &&
+
+            y <
+            oy + oh
+
+            &&
+
+            y + PLAYER_SIZE >
+            oy
+
+        ) {
+
+            return true;
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =====================================================
+   MOVE PLAYER
+===================================================== */
+
+function movePlayer(
+    player,
+    dx,
+    dy
+) {
+
+    const newX =
+        player.x + dx;
+
+
+    if (
+
+        newX >= 0 &&
+
+        newX <=
+        game.clientWidth -
+        PLAYER_SIZE &&
+
+        !touchingObstacle(
+            newX,
+            player.y
+        )
+
+    ) {
+
+        player.x =
+            newX;
+
+    }
+
+
+    const newY =
+        player.y + dy;
+
+
+    if (
+
+        newY >= 0 &&
+
+        newY <=
+        game.clientHeight -
+        PLAYER_SIZE &&
+
+        !touchingObstacle(
+            player.x,
+            newY
+        )
+
+    ) {
+
+        player.y =
+            newY;
+
+    }
+
+}
+
+
+/* =====================================================
+   POWERUP CHECK
+===================================================== */
+
+function checkPowerups() {
+
+    for (
+        let i =
+            powerups.length - 1;
+
+        i >= 0;
+
+        i--
+    ) {
+
+        const power =
+            powerups[i];
+
+
+        const px =
+            power.offsetLeft;
+
+
+        const py =
+            power.offsetTop;
+
+
+        const type =
+            power.dataset.type;
+
+
+        /*
+         * TOTORO
+         */
+
+        if (
+            type === "totoro"
+        ) {
+
+            const distance =
+                distanceBetween(
+
+                    runnerPos.x,
+                    runnerPos.y,
+
+                    px,
+                    py
+
+                );
+
+
+            if (
+                distance < 65
+            ) {
+
+                activateBuff(
+                    "totoro",
+                    "runner"
+                );
+
+
+                power.remove();
+
+
+                powerups.splice(
+                    i,
+                    1
+                );
+
+
+                /*
+                 * Cancel the
+                 * 3-second disappearance.
+                 */
+
+                if (
+                    totoroTimer
+                ) {
+
+                    clearTimeout(
+                        totoroTimer
+                    );
+
+                    totoroTimer =
+                        null;
+
+                }
+
+            }
+
+
+            continue;
+
+        }
+
+
+        /*
+         * TIME POWERUP
+         */
+
+        if (
+            type === "time"
+        ) {
+
+            const distance =
+                distanceBetween(
+
+                    chaserPos.x,
+                    chaserPos.y,
+
+                    px,
+                    py
+
+                );
+
+
+            if (
+                distance < 45
+            ) {
+
+                activateBuff(
+                    "time",
+                    "chaser"
+                );
+
+
+                power.remove();
+
+
+                powerups.splice(
+                    i,
+                    1
+                );
+
+            }
+
+
+            continue;
+
+        }
+
+
+        /*
+         * NORMAL RUNNER POWERUPS
+         */
+
+        const distance =
+            distanceBetween(
+
+                runnerPos.x,
+                runnerPos.y,
+
+                px,
+                py
+
+            );
+
+
+        if (
+            distance < 45
+        ) {
+
+            activateBuff(
+                type,
+                "runner"
+            );
+
+
+            power.remove();
+
+
+            powerups.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   ACTIVATE BUFF
+===================================================== */
+
+function activateBuff(
+    type,
+    player
+) {
+
+
+    /* SPEED */
+
+    if (
+
+        type === "speed" &&
+        player === "runner"
+
+    ) {
+
+        runnerSpeed =
+            FAST_SPEED;
+
+
+        showBuff(
+            "⚡ RUNNER SPEED!"
+        );
+
+
+        setTimeout(
+            function() {
+
+                if (
+                    !totoroPowered
+                ) {
+
+                    runnerSpeed =
+                        NORMAL_SPEED;
+
+                }
+
+            },
+
+            5000
+        );
+
+    }
+
+
+    /* SHIELD */
+
+    if (
+
+        type === "shield" &&
+        player === "runner"
+
+    ) {
+
+        runnerShield =
+            true;
+
+
+        runner.classList.add(
+            "shielded"
+        );
+
+
+        showBuff(
+            "🛡️ RUNNER SHIELD!"
+        );
+
+
+        setTimeout(
+            function() {
+
+                if (
+                    !totoroPowered
+                ) {
+
+                    runnerShield =
+                        false;
+
+                    runner.classList.remove(
+                        "shielded"
+                    );
+
+                }
+
+            },
+
+            5000
+        );
+
+    }
+
+
+    /* DASH */
+
+    if (
+
+        type === "dash" &&
+        player === "runner"
+
+    ) {
+
+        const dx =
+            runnerPos.x -
+            chaserPos.x;
+
+
+        const dy =
+            runnerPos.y -
+            chaserPos.y;
+
+
+        const distance =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+
+        if (
+            distance > 0
+        ) {
+
+            const dashDistance =
+                130;
+
+
+            const dashX =
+                (
+                    dx /
+                    distance
+                ) *
+                dashDistance;
+
+
+            const dashY =
+                (
+                    dy /
+                    distance
+                ) *
+                dashDistance;
+
+
+            movePlayer(
+                runnerPos,
+                dashX,
+                dashY
+            );
+
+        }
+
+
+        showBuff(
+            "🌀 RUNNER DASH!"
+        );
+
+    }
+
+
+    /* TIME */
+
+    if (
+
+        type === "time" &&
+        player === "chaser"
+
+    ) {
+
+        timeLeft += 10;
+
+
+        showBuff(
+            "⏱️ CHASER +10 SECONDS!"
+        );
+
+    }
+
+
+    /* TOTORO */
+
+    if (
+
+        type === "totoro" &&
+        player === "runner"
+
+    ) {
+
+        activateTotoro();
+
+    }
+
+}
+
+
+/* =====================================================
+   TOTORO POWER
+===================================================== */
+
+function activateTotoro() {
+
+    if (
+        totoroTimer
+    ) {
+
+        clearTimeout(
+            totoroTimer
+        );
+
+        totoroTimer =
+            null;
+
+    }
+
+
+    totoroPowered =
+        true;
+
+
+    /*
+     * MASSIVE SPEED
+     */
+
+    runnerSpeed =
+        TOTORO_SPEED;
+
+
+    /*
+     * HUGE BODY
+     */
+
+    runner.classList.add(
+        "totoroPowered"
+    );
+
+
+    /*
+     * INVINCIBILITY
+     */
+
+    runnerShield =
+        true;
+
+
+    runner.classList.add(
+        "shielded"
+    );
+
+
+    showBuff(
+        "🐻 TOTORO POWER!!! HUGE + SUPER FAST!!!"
+    );
+
+
+    /*
+     * Totoro power lasts
+     * 15 seconds after collection.
+     */
+
+    totoroTimer =
+        setTimeout(
+            function() {
+
+                deactivateTotoro();
+
+            },
+
+            TOTORO_DURATION
+        );
+
+}
+
+
+/* =====================================================
+   DEACTIVATE TOTORO
+===================================================== */
+
+function deactivateTotoro() {
+
+    totoroPowered =
+        false;
+
+
+    runnerSpeed =
+        NORMAL_SPEED;
+
+
+    runnerShield =
+        false;
+
+
+    runner.classList.remove(
+        "totoroPowered"
+    );
+
+
+    runner.classList.remove(
+        "shielded"
+    );
+
+
+    showBuff(
+        "🐻 Totoro power ended!"
+    );
+
+
+    totoroTimer =
+        null;
+
+}
+
+
+/* =====================================================
+   BUFF MESSAGE
+===================================================== */
+
+function showBuff(text) {
+
+    buffText.textContent =
+        text;
+
+
+    setTimeout(
+        function() {
+
+            buffText.textContent =
+                "";
+
+        },
+
+        1800
+    );
+
+}
+
+
+/* =====================================================
+   DRAW PLAYERS
+===================================================== */
+
+function drawPlayers() {
+
+    runner.style.left =
+        runnerPos.x + "px";
+
+
+    runner.style.top =
+        runnerPos.y + "px";
+
+
+    chaser.style.left =
+        chaserPos.x + "px";
+
+
+    chaser.style.top =
+        chaserPos.y + "px";
+
+}
+
+
+/* =====================================================
+   TAG
+===================================================== */
+
+function checkTag() {
+
+    /*
+     * Totoro/shield protects Runner.
+     */
+
+    if (
+        runnerShield
+    ) {
+
+        return;
+
+    }
+
+
+    const distance =
+        distanceBetween(
+
+            runnerPos.x,
+            runnerPos.y,
+
+            chaserPos.x,
+            chaserPos.y
+
+        );
+
+
+    if (
+        distance < 40
+    ) {
+
+        endGame(
+
+            "💥 CHASER WINS!<br><br>" +
+
+            "🔴 The Runner got tagged!"
+
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   GAME LOOP
+===================================================== */
+
+function gameLoop() {
+
+    if (
+        !gameRunning
+    ) {
+
+        return;
+
+    }
+
+
+    /* RUNNER */
+
+    let runnerDX = 0;
+
+    let runnerDY = 0;
+
+
+    if (
+        keys["w"]
+    ) {
+
+        runnerDY -=
+            runnerSpeed;
+
+    }
+
+
+    if (
+        keys["s"]
+    ) {
+
+        runnerDY +=
+            runnerSpeed;
+
+    }
+
+
+    if (
+        keys["a"]
+    ) {
+
+        runnerDX -=
+            runnerSpeed;
+
+    }
+
+
+    if (
+        keys["d"]
+    ) {
+
+        runnerDX +=
+            runnerSpeed;
+
+    }
+
+
+    movePlayer(
+        runnerPos,
+        runnerDX,
+        runnerDY
+    );
+
+
+    /* CHASER */
+
+    let chaserDX = 0;
+
+    let chaserDY = 0;
+
+
+    if (
+        keys["arrowup"]
+    ) {
+
+        chaserDY -=
+            chaserSpeed;
+
+    }
+
+
+    if (
+        keys["arrowdown"]
+    ) {
+
+        chaserDY +=
+            chaserSpeed;
+
+    }
+
+
+    if (
+        keys["arrowleft"]
+    ) {
+
+        chaserDX -=
+            chaserSpeed;
+
+    }
+
+
+    if (
+        keys["arrowright"]
+    ) {
+
+        chaserDX +=
+            chaserSpeed;
+
+    }
+
+
+    movePlayer(
+        chaserPos,
+        chaserDX,
+        chaserDY
+    );
+
+
+    checkPowerups();
+
+    checkTag();
+
+    drawPlayers();
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =====================================================
+   TIMER
+===================================================== */
+
+setInterval(
+    function() {
+
+        if (
+            !gameRunning
+        ) {
+
+            return;
+
+        }
+
+
+        timeLeft--;
+
+
+        const minutes =
+            Math.floor(
+                timeLeft / 60
+            );
+
+
+        const seconds =
+            timeLeft % 60;
+
+
+        timerDisplay.textContent =
+
+            minutes +
+
+            ":" +
+
+            seconds
+                .toString()
+                .padStart(
+                    2,
+                    "0"
+                );
+
+
+        if (
+            timeLeft <= 0
+        ) {
+
+            endGame(
+
+                "🏆 RUNNER WINS!<br><br>" +
+
+                "🔵 They survived 2 minutes!"
+
+            );
+
+        }
+
+    },
+
+    1000
+);
+
+
+/* =====================================================
+   END GAME
+===================================================== */
+
+function endGame(text) {
+
+    gameRunning =
+        false;
+
+
+    stopPowerupSpawner();
+
+
+    if (
+        totoroTimer
+    ) {
+
+        clearTimeout(
+            totoroTimer
+        );
+
+        totoroTimer =
+            null;
+
+    }
+
+
+    message.innerHTML =
+        text;
+
+
+    message.style.display =
+        "block";
+
+}
+
+
+/* =====================================================
+   START GAME
+===================================================== */
+
+function startGame() {
+
+    menu.style.display =
+        "none";
+
+
+    gameScreen.style.display =
+        "block";
+
+
+    game.className =
+        "";
+
+
+    game.classList.add(
+        selectedMapName
+    );
+
+
+    restartGame();
+
+}
+
+
+/* =====================================================
+   RESTART
+===================================================== */
+
+function restartGame() {
+
+    stopPowerupSpawner();
+
+
+    if (
+        totoroTimer
+    ) {
+
+        clearTimeout(
+            totoroTimer
+        );
+
+        totoroTimer =
+            null;
+
+    }
+
+
+    timeLeft =
+        120;
+
+
+    runnerSpeed =
+        NORMAL_SPEED;
+
+
+    runnerShield =
+        false;
+
+
+    totoroPowered =
+        false;
+
+
+    runner.classList.remove(
+        "shielded"
+    );
+
+
+    runner.classList.remove(
+        "totoroPowered"
+    );
+
+
+    gameRunning =
+        true;
+
+
+    message.style.display =
+        "none";
+
+
+    runnerPos.x =
+        30;
+
+
+    runnerPos.y =
+        30;
+
+
+    chaserPos.x =
+        game.clientWidth -
+        PLAYER_SIZE -
+        30;
+
+
+    chaserPos.y =
+        game.clientHeight -
+        PLAYER_SIZE -
+        30;
+
+
+    createMap();
+
+
+    drawPlayers();
+
+
+    timerDisplay.textContent =
+        "2:00";
+
+
+    /*
+     * Normal buffs begin after
+     * the first 10 seconds.
+     */
+
+    startPowerupSpawner();
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =====================================================
+   MENU
+===================================================== */
+
+function backToMenu() {
+
+    gameRunning =
+        false;
+
+
+    stopPowerupSpawner();
+
+
+    if (
+        totoroTimer
+    ) {
+
+        clearTimeout(
+            totoroTimer
+        );
+
+        totoroTimer =
+            null;
+
+    }
+
+
+    totoroPowered =
+        false;
+
+
+    runnerSpeed =
+        NORMAL_SPEED;
+
+
+    runnerShield =
+        false;
+
+
+    runner.classList.remove(
+        "totoroPowered"
+    );
+
+
+    runner.classList.remove(
+        "shielded"
+    );
+
+
+    gameScreen.style.display =
+        "none";
+
+
+    menu.style.display =
+        "flex";
+
+
+    message.style.display =
+        "none";
+
+}
+
+
+/* =====================================================
+   DEFAULT MAP
+===================================================== */
+
+selectMap("park");
+
+</script>
+
+</body>
+</html>
