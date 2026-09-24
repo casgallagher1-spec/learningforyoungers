@@ -1,0 +1,802 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>My Games</title> <style> * { box-sizing: border-box; }
+body {
+margin: 0;
+min-height: 100vh;
+font-family: Arial, Helvetica, sans-serif;
+background:
+linear-gradient(135deg, #eef7ff, #ffffff 45%, #dcecff);
+overflow-x: hidden;
+color: #333;
+}
+
+/* Wii-style top bar */
+.header {
+height: 90px;
+display: flex;
+align-items: center;
+justify-content: center;
+background: linear-gradient(#ffffff, #e8f3ff);
+border-bottom: 2px solid #c7d9ea;
+box-shadow: 0 3px 15px rgba(0,0,0,.12);
+}
+
+.header h1 {
+margin: 0;
+font-size: 34px;
+font-weight: 300;
+color: #555;
+letter-spacing: 2px;
+}
+
+/* Main area */
+.games {
+width: min(1100px, 94%);
+margin: 45px auto;
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 35px;
+}
+
+/* Game tile */
+.game {
+text-decoration: none;
+color: #333;
+display: block;
+}
+
+.card {
+height: 245px;
+border-radius: 22px;
+background: white;
+border: 2px solid #d4e1ed;
+box-shadow:
+0 8px 25px rgba(60,100,140,.18),
+inset 0 1px 0 white;
+overflow: hidden;
+transition: .2s;
+cursor: pointer;
+}
+
+.game:hover .card {
+transform: translateY(-6px) scale(1.015);
+box-shadow:
+0 15px 35px rgba(50,100,150,.28);
+}
+
+/* Artwork */
+.art {
+height: 190px;
+position: relative;
+overflow: hidden;
+}
+
+/* ---------------- DARIO ---------------- */
+
+.dario-art {
+background:
+linear-gradient(#66c9ff 0%, #a9e4ff 70%, #78c95b 70%, #4da844 100%);
+}
+
+.cloud {
+position: absolute;
+background: white;
+border-radius: 50px;
+width: 75px;
+height: 28px;
+}
+
+.cloud:before,
+.cloud:after {
+content: "";
+position: absolute;
+background: white;
+border-radius: 50%;
+}
+
+.cloud:before {
+width: 35px;
+height: 35px;
+left: 12px;
+top: -17px;
+}
+
+.cloud:after {
+width: 42px;
+height: 42px;
+left: 34px;
+top: -22px;
+}
+
+.c1 {
+top: 35px;
+left: 35px;
+}
+
+.c2 {
+top: 60px;
+right: 45px;
+transform: scale(.75);
+}
+
+.dario {
+position: absolute;
+left: 50%;
+bottom: 27px;
+transform: translateX(-50%);
+width: 55px;
+height: 85px;
+}
+
+.dario .hat {
+position: absolute;
+width: 52px;
+height: 18px;
+background: #e53935;
+border-radius: 18px 18px 4px 4px;
+top: 0;
+left: 2px;
+}
+
+.dario .hat:after {
+content: "D";
+position: absolute;
+color: white;
+font-weight: bold;
+font-size: 13px;
+left: 21px;
+top: 1px;
+}
+
+.dario .face {
+position: absolute;
+width: 39px;
+height: 32px;
+background: #ffc48f;
+left: 8px;
+top: 14px;
+}
+
+.dario .body {
+position: absolute;
+width: 45px;
+height: 34px;
+background: #e53935;
+left: 5px;
+top: 44px;
+}
+
+.dario .overall {
+position: absolute;
+width: 27px;
+height: 31px;
+background: #2768c7;
+left: 14px;
+top: 42px;
+}
+
+.dario .shoe1,
+.dario .shoe2 {
+position: absolute;
+width: 23px;
+height: 9px;
+background: #48291e;
+bottom: 0;
+}
+
+.dario .shoe1 {
+left: 2px;
+}
+
+.dario .shoe2 {
+right: 2px;
+}
+
+.coin {
+position: absolute;
+width: 20px;
+height: 20px;
+background: #ffd92f;
+border: 3px solid #e7a900;
+border-radius: 50%;
+top: 50px;
+right: 150px;
+}
+
+/* ---------------- TETRIS ---------------- */
+
+.tetris-art {
+background:
+radial-gradient(circle at 30% 20%, #26336b, transparent 40%),
+radial-gradient(circle at 80% 80%, #421f67, transparent 40%),
+#080b16;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.tetris-board {
+width: 115px;
+height: 170px;
+border: 4px solid #6570a0;
+background: #090d1b;
+display: grid;
+grid-template-columns: repeat(6, 1fr);
+grid-template-rows: repeat(9, 1fr);
+gap: 2px;
+padding: 4px;
+}
+
+.block {
+border-radius: 2px;
+box-shadow: inset 2px 2px rgba(255,255,255,.3);
+}
+
+.cyan { background: #00e5ff; }
+.purple { background: #a855f7; }
+.yellow { background: #ffe600; }
+.green { background: #39e75f; }
+.red { background: #ff3b5c; }
+.blue { background: #4285ff; }
+.orange { background: #ff9f1c; }
+
+/* ---------------- TOTORO ---------------- */
+
+.totoro-art {
+background:
+linear-gradient(#9edcff 0%, #d7f3ff 62%, #72bd65 62%, #3c9545 100%);
+}
+
+.totoro {
+position: absolute;
+left: 50%;
+bottom: 12px;
+transform: translateX(-50%);
+width: 100px;
+height: 115px;
+background: #777;
+border-radius: 50% 50% 42% 42%;
+}
+
+.totoro:before,
+.totoro:after {
+content: "";
+position: absolute;
+top: -22px;
+width: 32px;
+height: 42px;
+background: #777;
+clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.totoro:before {
+left: 5px;
+}
+
+.totoro:after {
+right: 5px;
+}
+
+.totoro-eyes {
+position: absolute;
+top: 34px;
+left: 25px;
+width: 50px;
+height: 15px;
+}
+
+.totoro-eyes:before,
+.totoro-eyes:after {
+content: "";
+position: absolute;
+width: 11px;
+height: 11px;
+background: white;
+border-radius: 50%;
+}
+
+.totoro-eyes:before {
+left: 0;
+}
+
+.totoro-eyes:after {
+right: 0;
+}
+
+.totoro-belly {
+position: absolute;
+width: 70px;
+height: 45px;
+background: #bdbdbd;
+border-radius: 50%;
+left: 15px;
+bottom: 15px;
+}
+
+/* ---------------- OI PONG ---------------- */
+
+.pong-art {
+background:
+radial-gradient(circle at center, #263b5f, #101827);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.pong-board {
+position: relative;
+width: 330px;
+height: 155px;
+border: 3px solid rgba(255,255,255,.65);
+background: #0b1424;
+box-shadow: 0 0 25px rgba(80,180,255,.25);
+}
+
+.paddle {
+position: absolute;
+width: 10px;
+height: 55px;
+background: #42dfff;
+top: 48px;
+box-shadow: 0 0 12px #42dfff;
+}
+
+.paddle.left {
+left: 12px;
+}
+
+.paddle.right {
+right: 12px;
+background: #ff5b8a;
+box-shadow: 0 0 12px #ff5b8a;
+}
+
+.ball {
+position: absolute;
+width: 13px;
+height: 13px;
+background: white;
+border-radius: 50%;
+left: 155px;
+top: 70px;
+box-shadow: 0 0 15px white;
+}
+
+.net {
+position: absolute;
+left: 50%;
+top: 0;
+height: 100%;
+border-left: 3px dashed rgba(255,255,255,.35);
+}
+
+/* ---------------- POKEMONSTER ---------------- */
+
+.pokemon-art {
+background:
+radial-gradient(circle at 50% 35%, #ffe66d, transparent 20%),
+linear-gradient(145deg, #ff4d6d, #6a2c91 55%, #17133d);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.monster {
+position: relative;
+width: 105px;
+height: 105px;
+background: #7b5cff;
+border-radius: 45% 55% 48% 52%;
+box-shadow:
+0 0 25px #ff4dce,
+0 0 55px #6c4dff;
+}
+
+.monster:before,
+.monster:after {
+content: "";
+position: absolute;
+width: 30px;
+height: 38px;
+background: #ff4d6d;
+top: -17px;
+clip-path: polygon(50% 0,100% 100%,0 100%);
+}
+
+.monster:before {
+left: 12px;
+}
+
+.monster:after {
+right: 12px;
+}
+
+.monster-eyes {
+position: absolute;
+top: 30px;
+left: 24px;
+right: 24px;
+display: flex;
+justify-content: space-between;
+}
+
+.monster-eyes span {
+width: 22px;
+height: 27px;
+background: white;
+border-radius: 50%;
+box-shadow: 0 0 10px white;
+}
+
+.monster-mouth {
+position: absolute;
+width: 48px;
+height: 22px;
+left: 29px;
+bottom: 23px;
+background: #24143e;
+border-radius: 0 0 30px 30px;
+}
+
+/* ---------------- BOMB CITY ---------------- */
+
+.bomb-art {
+background:
+linear-gradient(to bottom, #15203b 0%, #283b63 62%, #101525 62%, #080b14 100%);
+}
+
+.city {
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+height: 72px;
+display: flex;
+align-items: flex-end;
+justify-content: center;
+gap: 5px;
+}
+
+.building {
+width: 45px;
+background: #202a42;
+border-top: 3px solid #536b9e;
+position: relative;
+}
+
+.building:nth-child(1) { height: 55px; }
+.building:nth-child(2) { height: 82px; }
+.building:nth-child(3) { height: 48px; }
+.building:nth-child(4) { height: 70px; }
+.building:nth-child(5) { height: 42px; }
+
+.window {
+position: absolute;
+width: 6px;
+height: 8px;
+background: #ffd84d;
+box-shadow: 0 0 8px #ffd84d;
+}
+
+.w1 { left: 9px; top: 15px; }
+.w2 { right: 9px; top: 30px; }
+.w3 { left: 15px; top: 45px; }
+
+.bomb {
+position: absolute;
+left: 50%;
+top: 42px;
+transform: translateX(-50%);
+width: 60px;
+height: 60px;
+border-radius: 50%;
+background: radial-gradient(circle at 35% 30%, #555, #090909 65%);
+box-shadow: 0 0 25px #ff3b30;
+}
+
+.fuse {
+position: absolute;
+width: 28px;
+height: 5px;
+background: #ffb300;
+top: -15px;
+right: 5px;
+transform: rotate(-35deg);
+box-shadow: 0 0 12px #ff6a00;
+}
+
+/* ---------------- NEON VOID ---------------- */
+
+.neon-art {
+background:
+radial-gradient(circle at 50% 40%, #171760, transparent 35%),
+radial-gradient(circle at 20% 80%, #003cff, transparent 35%),
+#02020b;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.neon-grid {
+position: absolute;
+bottom: 0;
+width: 100%;
+height: 80px;
+background:
+repeating-linear-gradient(
+90deg,
+transparent 0 28px,
+rgba(0,255,255,.3) 29px 30px
+);
+transform: perspective(100px) rotateX(55deg);
+transform-origin: bottom;
+}
+
+.neon-ship {
+position: relative;
+width: 0;
+height: 0;
+border-left: 35px solid transparent;
+border-right: 35px solid transparent;
+border-bottom: 70px solid #00eaff;
+filter: drop-shadow(0 0 15px #00ffff);
+}
+
+.neon-ship:after {
+content: "";
+position: absolute;
+left: -8px;
+top: 45px;
+width: 16px;
+height: 28px;
+background: #ff176f;
+box-shadow: 0 0 18px #ff176f;
+}
+
+/* ---------------- SOMBE ---------------- */
+
+.sombe-art {
+background:
+radial-gradient(circle at 50% 45%, #405b4b, transparent 30%),
+linear-gradient(#17241f, #090d0c);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.sombe {
+position: relative;
+width: 82px;
+height: 115px;
+background: #687d6b;
+border-radius: 45% 45% 25% 25%;
+box-shadow: 0 0 20px rgba(94,255,141,.25);
+}
+
+.sombe:before {
+content: "";
+position: absolute;
+width: 92px;
+height: 38px;
+left: -5px;
+top: -10px;
+background: #344238;
+border-radius: 50%;
+transform: rotate(-8deg);
+}
+
+.sombe-eyes {
+position: absolute;
+top: 38px;
+left: 18px;
+right: 18px;
+display: flex;
+justify-content: space-between;
+}
+
+.sombe-eyes span {
+width: 15px;
+height: 15px;
+border-radius: 50%;
+background: #d7ff72;
+box-shadow: 0 0 12px #9cff42;
+}
+
+.sombe-mouth {
+position: absolute;
+left: 20px;
+bottom: 22px;
+width: 42px;
+height: 12px;
+border-bottom: 4px solid #171c19;
+border-radius: 50%;
+}
+
+/* Names */
+.name {
+height: 55px;
+display: flex;
+justify-content: center;
+align-items: center;
+font-size: 23px;
+font-weight: 500;
+color: #555;
+}
+
+/* Footer */
+.footer {
+text-align: center;
+color: #8a9bad;
+font-size: 14px;
+margin: 15px 0 30px;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+.games {
+grid-template-columns: 1fr;
+gap: 25px;
+}
+
+.header h1 {
+    font-size: 27px;
+}
+
+}
+</style>
+
+</head> <body> <div class="header"> <h1>🎮 MY GAMES</h1> </div> <div class="games">
+<!-- DARIO -->
+<a class="game" href="dario.html">
+    <div class="card">
+        <div class="art dario-art">
+            <div class="cloud c1"></div>
+            <div class="cloud c2"></div>
+            <div class="coin"></div>
+
+            <div class="dario">
+                <div class="hat"></div>
+                <div class="face"></div>
+                <div class="body"></div>
+                <div class="overall"></div>
+                <div class="shoe1"></div>
+                <div class="shoe2"></div>
+            </div>
+        </div>
+        <div class="name">🍄 Dario Deluxe</div>
+    </div>
+</a>
+
+<!-- MODERN TETRIS -->
+<a class="game" href="modern-tetris.html">
+    <div class="card">
+        <div class="art tetris-art">
+            <div class="tetris-board">
+                <div></div><div class="cyan"></div><div class="cyan"></div><div class="cyan"></div><div class="cyan"></div><div></div>
+                <div></div><div class="purple"></div><div class="purple"></div><div class="yellow"></div><div class="yellow"></div><div></div>
+                <div class="green"></div><div class="green"></div><div class="red"></div><div class="red"></div><div class="blue"></div><div class="blue"></div>
+                <div class="green"></div><div class="red"></div><div class="red"></div><div class="orange"></div><div class="orange"></div><div class="blue"></div>
+                <div class="green"></div><div class="yellow"></div><div class="yellow"></div><div class="orange"></div><div class="orange"></div><div class="blue"></div>
+                <div class="purple"></div><div class="purple"></div><div class="purple"></div><div></div><div class="red"></div><div class="red"></div>
+                <div class="cyan"></div><div class="cyan"></div><div class="yellow"></div><div class="yellow"></div><div class="green"></div><div class="green"></div>
+                <div class="orange"></div><div class="orange"></div><div class="blue"></div><div class="blue"></div><div class="purple"></div><div class="purple"></div>
+                <div class="red"></div><div class="red"></div><div class="cyan"></div><div class="cyan"></div><div class="yellow"></div><div class="yellow"></div>
+            </div>
+        </div>
+        <div class="name">🧩 Modern Tetris</div>
+    </div>
+</a>
+
+<!-- TOTORO TAG -->
+<a class="game" href="totoro-tag.html">
+    <div class="card">
+        <div class="art totoro-art">
+            <div class="cloud c1"></div>
+            <div class="totoro">
+                <div class="totoro-eyes"></div>
+                <div class="totoro-belly"></div>
+            </div>
+        </div>
+        <div class="name">🌳 Totoro Tag</div>
+    </div>
+</a>
+
+<!-- OI PONG -->
+<a class="game" href="oi-pong.html">
+    <div class="card">
+        <div class="art pong-art">
+            <div class="pong-board">
+                <div class="paddle left"></div>
+                <div class="paddle right"></div>
+                <div class="net"></div>
+                <div class="ball"></div>
+            </div>
+        </div>
+        <div class="name">🏓 Oi Pong</div>
+    </div>
+</a>
+
+<!-- POKEMONSTER -->
+<a class="game" href="pokemonster.html">
+    <div class="card">
+        <div class="art pokemon-art">
+            <div class="monster">
+                <div class="monster-eyes">
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="monster-mouth"></div>
+            </div>
+        </div>
+        <div class="name">⚡ Pokémonster</div>
+    </div>
+</a>
+
+<!-- BOMB CITY -->
+<a class="game" href="bomb-city.html">
+    <div class="card">
+        <div class="art bomb-art">
+
+            <div class="city">
+                <div class="building">
+                    <span class="window w1"></span>
+                    <span class="window w2"></span>
+                </div>
+
+                <div class="building">
+                    <span class="window w1"></span>
+                    <span class="window w2"></span>
+                    <span class="window w3"></span>
+                </div>
+
+                <div class="building">
+                    <span class="window w1"></span>
+                    <span class="window w2"></span>
+                </div>
+
+                <div class="building">
+                    <span class="window w1"></span>
+                    <span class="window w3"></span>
+                </div>
+
+                <div class="building">
+                    <span class="window w2"></span>
+                </div>
+            </div>
+
+            <div class="bomb">
+                <div class="fuse"></div>
+            </div>
+
+        </div>
+        <div class="name">💣 Bomb City</div>
+    </div>
+</a>
+
+<!-- NEON VOID -->
+<a class="game" href="neon-void.html">
+    <div class="card">
+        <div class="art neon-art">
+            <div class="neon-grid"></div>
+            <div class="neon-ship"></div>
+        </div>
+        <div class="name">🌌 Neon Void</div>
+    </div>
+</a>
+
+<!-- SOMBE -->
+<a class="game" href="sombe.html">
+    <div class="card">
+        <div class="art sombe-art">
+            <div class="sombe">
+                <div class="sombe-eyes">
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="sombe-mouth"></div>
+            </div>
+        </div>
+        <div class="name">🧟 Sombe</div>
+    </div>
+</a>
+
+</div> <div class="footer"> Select a game to play </div> </body> </html>
